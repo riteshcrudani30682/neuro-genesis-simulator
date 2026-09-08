@@ -29,9 +29,8 @@ jobs:
     
     - name: Run tests
       run: |
-        python tests/test_regions.py
-        python tests/test_rl.py
-        python tests/test_rl_integration.py
+        python -m pytest -q
+        python main.py --headless --steps 2
     
     - name: Check code style
       run: |

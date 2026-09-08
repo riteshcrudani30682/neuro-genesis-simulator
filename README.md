@@ -23,7 +23,7 @@ A sophisticated neural network cellular automaton simulator with reinforcement l
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/neuro-genesis-simulator.git
+git clone https://github.com/riteshcrudani30682/neuro-genesis-simulator.git
 cd neuro-genesis-simulator
 ```
 
@@ -40,21 +40,15 @@ Run the main simulation with integrated control panel:
 python main.py
 ```
 
-### Testing Components
-Test multi-region functionality:
+### Testing and headless mode
 ```bash
-python test_regions.py
+python -m pytest -q
+python main.py --headless --steps 5 --seed 42
+python main.py --no-panel
 ```
-
-Test reinforcement learning:
-```bash
-python test_rl.py
-```
-
-Test RL integration:
-```bash
-python test_rl_integration.py
-```
+The default launcher opens one connected control panel. Start/Stop controls the
+simulation, and Quit saves the state before closing. `--no-panel` uses keyboard
+controls only. Headless mode runs without opening either window.
 
 ### Running Individual Modules
 
@@ -81,12 +75,13 @@ python control_panel.py
 ## 🎮 Controls
 
 ### Keyboard Controls
-- **SPACE**: Pause/Resume simulation
-- **R**: Reset simulation
-- **S**: Save current state
-- **L**: Load saved state
-- **+/-**: Adjust simulation speed
-- **ESC**: Exit simulation
+- **Left click**: Stimulate a cell
+- **SPACE**: Reward cells near the mouse
+- **P**: Pause/resume
+- **C**: Clear the grid
+- **R**: Run replay learning when enabled
+- **S / L**: Save / load state
+- **ESC**: Save and exit
 
 ### Control Panel
 The GUI control panel allows you to adjust:
@@ -125,7 +120,7 @@ The GUI control panel allows you to adjust:
 
 ### State Representation
 - Grid size: 64x48 cells
-- Input dimensions: Configurable (default: 100)
+- Input dimensions: 14 (8 neighbor activations + 6 information values)
 - Action space: 4 discrete actions
 - Reward: Based on optimal activation ranges
 
@@ -141,7 +136,7 @@ Key parameters can be adjusted in the code or via the control panel:
 
 ```python
 # In neuro_genesis_sim.py
-INP_DIM = 100          # Input dimension
+INP_DIM = 14          # Input dimension
 REGION_COUNT = 3       # Number of brain regions
 GRID_WIDTH = 64        # Grid width
 GRID_HEIGHT = 48       # Grid height
@@ -206,3 +201,11 @@ For questions or suggestions, please open an issue on GitHub.
 ---
 
 **Made with ❤️ for neural network enthusiasts**
+
+## Current learning scope
+
+The main simulation trains its regional neural network from mouse rewards.
+Q-learning helpers are tested independently, but the main loop does not yet apply
+Q-network actions to the environment. Replay transitions in that loop are still
+placeholders. This is an experimental cellular simulator, not an autonomous
+learning agent. Only load your own trusted `.pkl` saves.
