@@ -19,8 +19,9 @@ setup(
     description="A neural network cellular automaton simulator with reinforcement learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/neuro-genesis-simulator",
-    packages=find_packages(),
+    url="https://github.com/riteshcrudani30682/neuro-genesis-simulator",
+    py_modules=["main", "neuro_genesis_sim", "control_panel",
+                "neuro_ca_sim", "creature_sim", "creature_rl_ns"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -43,7 +44,7 @@ setup(
     },
     keywords="neural-network cellular-automaton reinforcement-learning simulation",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/neuro-genesis-simulator/issues",
-        "Source": "https://github.com/yourusername/neuro-genesis-simulator",
+        "Bug Reports": "https://github.com/riteshcrudani30682/neuro-genesis-simulator/issues",
+        "Source": "https://github.com/riteshcrudani30682/neuro-genesis-simulator",
     },
 )

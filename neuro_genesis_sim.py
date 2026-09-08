@@ -567,9 +567,11 @@ def get_state(cell, x, y):
     
     return np.array(state, dtype=np.float32)
 
-def choose_action(state, epsilon=EPSILON):
+def choose_action(state, epsilon=None):
     """Choose action using epsilon-greedy policy"""
-    if random.random() <= epsilon:
+    if epsilon is None:
+        epsilon = EPSILON
+    if random.random() < epsilon:
         # Explore: choose random action
         return random.randint(0, 3)
     else:
@@ -605,7 +607,7 @@ def update_q_network(state, action, reward, next_state, done=False):
     current_q_value = current_q_values[0, action]
     
     if done:
-        target_q_value = reward
+        target_q_value = current_q_value.new_tensor(reward)
     else:
         # Get next Q-values and compute target
         with torch.no_grad():
@@ -625,7 +627,7 @@ def update_q_network(state, action, reward, next_state, done=False):
 # Enhanced Simulation Step with RL
 # -----------------------
 def sim_step(reward_map=None, frame_count=0):
-    global brain, optimizer, scaler, EPSILON
+    global EPSILON
     # reward_map: 2D array same dims with reward floats (0..1) applied this timestep
     
     # Collect all alive cells
@@ -646,19 +648,9 @@ def sim_step(reward_map=None, frame_count=0):
     N_alive = len(alive_cells)
     
     # Build input tensor for all alive cells
-    inp_tensor = torch.zeros((N_alive, INP_DIM), dtype=torch.float32, device=device)
-    
-    for i, (cell, x, y) in enumerate(alive_cells):
-        # Gather neighbor activations
-        neigh_idx = 0
-        for nx, ny in neighbors_coords(x, y):
-            neigh_cell = grid[nx][ny]
-            inp_tensor[i, neigh_idx] = float(neigh_cell.act if neigh_cell.alive else 0.0)
-            neigh_idx += 1
-        
-        # Add cell info
-        inp_tensor[i, NEIGHBOR_COUNT:] = torch.from_numpy(cell.info).to(device)
-    
+    inputs = np.stack([get_state(cell, x, y) for cell, x, y in alive_cells])
+    inp_tensor = torch.from_numpy(inputs).to(device)
+
     # Batched forward pass - use region-specific network
     with torch.no_grad():
         with create_amp_autocast("cuda", enabled=USE_AMP and device.type == "cuda"):
@@ -669,7 +661,7 @@ def sim_step(reward_map=None, frame_count=0):
                 region_indices = [i for i, (cell, _, _) in enumerate(alive_cells) if cell.region_id == region_id]
                 if region_indices:
                     region_inp = inp_tensor[region_indices]
-                    region_preds = brain(region_inp, region_id).squeeze()
+                    region_preds = brain(region_inp, region_id).squeeze(-1)
                     # Ensure the same dtype
                     if region_preds.dtype != predictions.dtype:
                         region_preds = region_preds.to(predictions.dtype)
@@ -768,7 +760,7 @@ def sim_step(reward_map=None, frame_count=0):
                         if region_indices:
                             region_inp = train_inp[region_indices]
                             region_targets = targets[region_indices]
-                            region_preds = brain(region_inp, region_id).squeeze()
+                            region_preds = brain(region_inp, region_id).squeeze(-1)
                             region_loss = nn.functional.mse_loss(region_preds, region_targets)
                             if total_loss is None:
                                 total_loss = region_loss * REGION_WEIGHTS[region_id]
@@ -789,7 +781,7 @@ def sim_step(reward_map=None, frame_count=0):
                     if region_indices:
                         region_inp = train_inp[region_indices]
                         region_targets = targets[region_indices]
-                        region_preds = brain(region_inp, region_id).squeeze()
+                        region_preds = brain(region_inp, region_id).squeeze(-1)
                         region_loss = nn.functional.mse_loss(region_preds, region_targets)
                         if total_loss is None:
                             total_loss = region_loss * REGION_WEIGHTS[region_id]
@@ -802,7 +794,7 @@ def sim_step(reward_map=None, frame_count=0):
     
     # Decay epsilon for exploration
     if EPSILON > EPSILON_MIN:
-        EPSILON *= EPSILON_DECAY
+        EPSILON = max(EPSILON_MIN, EPSILON * EPSILON_DECAY)
     
     # Memory compression
     if random.random() < MERGE_PROB:
@@ -882,7 +874,7 @@ def replay_learning():
                     if region_indices:
                         region_inp = train_inp[region_indices]
                         region_targets = targets[region_indices]
-                        region_preds = brain(region_inp, region_id).squeeze()
+                        region_preds = brain(region_inp, region_id).squeeze(-1)
                         region_loss = nn.functional.mse_loss(region_preds, region_targets)
                         if total_loss is None:
                             total_loss = region_loss * REGION_WEIGHTS[region_id]
@@ -903,7 +895,7 @@ def replay_learning():
                 if region_indices:
                     region_inp = train_inp[region_indices]
                     region_targets = targets[region_indices]
-                    region_preds = brain(region_inp, region_id).squeeze()
+                    region_preds = brain(region_inp, region_id).squeeze(-1)
                     region_loss = nn.functional.mse_loss(region_preds, region_targets)
                     if total_loss is None:
                         total_loss = region_loss * REGION_WEIGHTS[region_id]
@@ -1172,6 +1164,8 @@ def load_sim(filename=SAVE_FILE):
 # -----------------------
 def run_smoke_test(steps=5):  # Reduced steps for faster testing
     """Run a headless smoke test"""
+    if steps < 1:
+        raise ValueError("steps must be at least 1")
     print("Running smoke test...")
     
     # Initialize
@@ -1192,7 +1186,7 @@ def run_smoke_test(steps=5):  # Reduced steps for faster testing
         
         sim_step(reward_map=reward_map, frame_count=i)
         
-        if i % (steps//5) == 0:
+        if i % max(1, steps//5) == 0:
             current_alive = sum(1 for x in range(GRID_W) for y in range(GRID_H) if grid[x][y].alive)
             print(f"Step {i}: {current_alive} alive cells")
     
@@ -1209,52 +1203,49 @@ def run_smoke_test(steps=5):  # Reduced steps for faster testing
 # -----------------------
 # Control Panel Integration
 # -----------------------
-def start_control_panel():
-    """Start the control panel in a separate thread"""
-    global controller, control_panel_thread
-    if not CONTROL_PANEL_AVAILABLE or SimulationController is None:
+def apply_parameter(name, value):
+    """Apply a GUI parameter to both configuration and its runtime object."""
+    global replay_buffer
+    globals()[name] = value
+    if name == 'LEARNING_RATE':
+        for group in optimizer.param_groups:
+            group['lr'] = value
+    elif name == 'LEARNING_RATE_RL':
+        for group in q_optimizer.param_groups:
+            group['lr'] = value
+    elif name == 'REPLAY_BUFFER_SIZE':
+        replay_buffer = deque(replay_buffer, maxlen=int(value))
+    elif name == 'SOUND_ENABLED' and value and not sound_initialized:
+        init_sound()
+
+
+def start_control_panel(existing_controller=None):
+    """Connect one controller to the simulation; no background GUI thread."""
+    global controller
+    if not CONTROL_PANEL_AVAILABLE:
         return None
-        
-    try:
-        controller = SimulationController()
-        
-        # Register callbacks for parameter updates
-        controller.register_callback('DT', lambda v: globals().update({'DT': v}))
-        controller.register_callback('SPAWN_THRESHOLD', lambda v: globals().update({'SPAWN_THRESHOLD': v}))
-        controller.register_callback('SPAWN_PROB', lambda v: globals().update({'SPAWN_PROB': v}))
-        controller.register_callback('MUTATION_STD', lambda v: globals().update({'MUTATION_STD': v}))
-        controller.register_callback('LEARNING_RATE', lambda v: globals().update({'LEARNING_RATE': v}))
-        controller.register_callback('DECAY', lambda v: globals().update({'DECAY': v}))
-        controller.register_callback('STIM_STRONG', lambda v: globals().update({'STIM_STRONG': v}))
-        controller.register_callback('INIT_DENSITY', lambda v: globals().update({'INIT_DENSITY': v}))
-        controller.register_callback('SOUND_ENABLED', lambda v: globals().update({'SOUND_ENABLED': v}))
-        controller.register_callback('BASE_FREQ', lambda v: globals().update({'BASE_FREQ': v}))
-        controller.register_callback('SOUND_COOLDOWN', lambda v: globals().update({'SOUND_COOLDOWN': v}))
-        controller.register_callback('MERGE_THRESHOLD', lambda v: globals().update({'MERGE_THRESHOLD': v}))
-        controller.register_callback('MERGE_PROB', lambda v: globals().update({'MERGE_PROB': v}))
-        controller.register_callback('REGION_WEIGHTS', lambda v: globals().update({'REGION_WEIGHTS': v}))
-        controller.register_callback('REPLAY_ENABLED', lambda v: globals().update({'REPLAY_ENABLED': v}))
-        controller.register_callback('REPLAY_BUFFER_SIZE', lambda v: globals().update({'REPLAY_BUFFER_SIZE': v}))
-        controller.register_callback('GAMMA', lambda v: globals().update({'GAMMA': v}))
-        controller.register_callback('EPSILON', lambda v: globals().update({'EPSILON': v}))
-        controller.register_callback('EPSILON_DECAY', lambda v: globals().update({'EPSILON_DECAY': v}))
-        controller.register_callback('EPSILON_MIN', lambda v: globals().update({'EPSILON_MIN': v}))
-        controller.register_callback('LEARNING_RATE_RL', lambda v: globals().update({'LEARNING_RATE_RL': v}))
-        
-        print("Control panel initialized")
-        return controller
-    except Exception as e:
-        print(f"Failed to initialize control panel: {e}")
-        return None
+    controller = existing_controller or SimulationController()
+    for name in controller.params:
+        controller.register_callback(name, lambda value, name=name: apply_parameter(name, value))
+        apply_parameter(name, controller.params[name])
+    return controller
 
 # -----------------------
 # Main loop
 # -----------------------
-def main():
+def main(with_control_panel=True):
     screen, font, clock = init_visualization()
-    
-    # Initialize control panel if available
-    controller = start_control_panel()
+    panel = None
+    controller = start_control_panel() if with_control_panel else None
+    if controller is not None:
+        try:
+            from control_panel import ControlPanel
+            panel = ControlPanel(controller)
+            panel.start_simulation()
+        except Exception as exc:
+            print(f"Control panel unavailable: {exc}. Continuing with keyboard controls.")
+            controller = None
+    paused = False
     
     # Initialize sound if enabled
     if SOUND_ENABLED:
@@ -1267,12 +1258,17 @@ def main():
     print("Controls:")
     print("  Left click: stimulate cell")
     print("  Space: give positive reward to cells near mouse")
+    print("  P: pause/resume")
     print("  S: save model")
     print("  L: load model")
     print("  C: clear grid (reset)")
     print("  Esc: quit (auto-save)")
     
     while running:
+        if panel is not None:
+            panel.process_events()
+            if controller.quit_requested:
+                break
         frame_start = pygame.time.get_ticks()
         
         screen.fill((0,0,0))
@@ -1299,6 +1295,14 @@ def main():
                     save_sim()
                 elif event.key == pygame.K_l:
                     load_sim()
+                elif event.key == pygame.K_p:
+                    if panel is not None:
+                        if controller.simulation_running:
+                            panel.stop_simulation()
+                        else:
+                            panel.start_simulation()
+                    else:
+                        paused = not paused
                 elif event.key == pygame.K_c:
                     random_init(density=0.0)
                 elif event.key == pygame.K_ESCAPE:
@@ -1321,8 +1325,11 @@ def main():
                         print("Performed replay learning step")
 
         # Every frame, do a sim step with current reward_map
-        sim_step(reward_map=reward_map, frame_count=frame_count)
-        frame_count += 1
+        if not running:
+            break
+        if not paused and (controller is None or controller.simulation_running):
+            sim_step(reward_map=reward_map, frame_count=frame_count)
+            frame_count += 1
 
         draw(screen, font, clock)
         pygame.display.flip()
@@ -1337,9 +1344,13 @@ def main():
             avg_frame_time = sum(frame_times) / len(frame_times)
             print(f"Avg frame time: {avg_frame_time:.2f}ms")
 
-    pygame.quit()
-    print("Bye! Saved weights automatically.")
-    save_sim()
+    try:
+        save_sim()
+        print("Bye! Saved weights automatically.")
+    finally:
+        if panel is not None:
+            panel.close()
+        pygame.quit()
 
 # -----------------------
 # Entry point

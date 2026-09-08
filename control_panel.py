@@ -34,6 +34,7 @@ class SimulationController:
         }
         self.callbacks = {}
         self.simulation_running = False
+        self.quit_requested = False
         self.profiles_dir = "profiles"
         os.makedirs(self.profiles_dir, exist_ok=True)
         
@@ -99,6 +100,8 @@ class ControlPanel:
     def __init__(self, controller):
         self.controller = controller
         self.root = tk.Tk()
+        self.closed = False
+        self.root.protocol("WM_DELETE_WINDOW", self.quit_application)
         self.root.title("Neuro-Genesis Control Panel")
         self.root.geometry("500x800")
         
@@ -706,9 +709,19 @@ class ControlPanel:
     def quit_application(self):
         """Quit the application"""
         self.controller.stop_simulation()
-        self.root.quit()
-        self.root.destroy()
-        os._exit(0)  # Force exit to terminate all threads
+        self.controller.quit_requested = True
+        self.close()
+
+    def close(self):
+        if not self.closed:
+            self.closed = True
+            self.root.destroy()
+
+    def process_events(self):
+        """Pump Tk on the same thread that created it."""
+        if not self.closed:
+            self.root.update_idletasks()
+            self.root.update()
         
     def run(self):
         """Run the control panel"""

@@ -355,7 +355,6 @@ def get_state(cell, x, y):
 
 def select_action(state):
     """Select action using epsilon-greedy policy"""
-    global EPSILON
     if random.random() <= EPSILON:
         # Explore: choose random action
         return random.randint(0, 3)
@@ -440,7 +439,7 @@ def update_q_network(states, actions, rewards, next_states, dones):
 # Simulation functions
 # -----------------------
 def sim_step(reward_map=None, frame_count=0):
-    global ns_brain, q_network, ns_optimizer, rl_optimizer, scaler_ns, scaler_rl, EPSILON
+    global EPSILON
     # reward_map: 2D array same dims with reward floats (0..1) applied this timestep
     
     # Collect all alive creature cells
@@ -808,7 +807,7 @@ def save_sim(filename=SAVE_FILE):
     print("Saved to", filename)
 
 def load_sim(filename=SAVE_FILE):
-    global ns_brain, q_network, ns_optimizer, rl_optimizer, evolution_log, EPSILON, GAMMA
+    global ns_brain, q_network, evolution_log, EPSILON, GAMMA
     if not os.path.exists(filename):
         print("No save file found:", filename)
         return

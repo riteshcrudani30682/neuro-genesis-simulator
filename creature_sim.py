@@ -252,7 +252,7 @@ def remove_food(x, y):
 # Simulation functions
 # -----------------------
 def sim_step(reward_map=None, frame_count=0):
-    global brain, optimizer, scaler, EXPLORATION_RATE
+    global EXPLORATION_RATE
     # reward_map: 2D array same dims with reward floats (0..1) applied this timestep
     
     # Collect all alive creature cells
@@ -534,7 +534,7 @@ def save_sim(filename=SAVE_FILE):
     print("Saved to", filename)
 
 def load_sim(filename=SAVE_FILE):
-    global brain, optimizer, evolution_log
+    global brain, evolution_log
     if not os.path.exists(filename):
         print("No save file found:", filename)
         return
