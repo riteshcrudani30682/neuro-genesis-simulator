@@ -627,7 +627,7 @@ def update_q_network(state, action, reward, next_state, done=False):
 # Enhanced Simulation Step with RL
 # -----------------------
 def sim_step(reward_map=None, frame_count=0):
-    global brain, optimizer, scaler, EPSILON
+    global EPSILON
     # reward_map: 2D array same dims with reward floats (0..1) applied this timestep
     
     # Collect all alive cells

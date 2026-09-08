@@ -11,6 +11,17 @@ A sophisticated neural network cellular automaton simulator with reinforcement l
 - **Control Panel**: GUI for parameter adjustment and simulation control
 - **State Persistence**: Save and load simulation states
 
+## Visible test recording
+
+[Watch or download the simulator test (MP4)](docs/media/neuro-genesis-visible-test.mp4)
+
+This recording captures the actual Pygame renderer and main event loop on a CPU
+with an SDL test display. It shows stimulation across all three regions,
+keyboard pause/resume, a mouse-position reward, and saving. During pause, the
+cell state was checked unchanged for 36 captured frames; after resume it changed
+again. Playback is 12 captured frames per second, not a real-time performance
+benchmark. This does not test the native Windows/Tk control-panel window or CUDA.
+
 ## 📋 Requirements
 
 - Python 3.8+

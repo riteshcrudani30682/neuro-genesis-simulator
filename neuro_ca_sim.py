@@ -252,7 +252,6 @@ def play_activation_sound(activation_level):
 # Simulation step
 # -----------------------
 def sim_step(reward_map=None):
-    global brain, optimizer
     # reward_map: 2D array same dims with reward floats (0..1) applied this timestep
     delta_acts = np.zeros((GRID_W, GRID_H), dtype=float)
 
