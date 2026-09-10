@@ -1,0 +1,89 @@
+[
+  {
+    "baseline": "evolved",
+    "generation": 20,
+    "population_size": 50,
+    "survival_rate": 0.94,
+    "mean_fitness": 70.4767282101774,
+    "best_fitness": 94.5206598343834,
+    "median_fitness": 70.44011427136692,
+    "food_efficiency": 0.12748257918144723,
+    "mean_lifetime": 296.76,
+    "offspring_count": 0,
+    "genetic_diversity": 0.014310320639634963,
+    "evaluation_seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_mean_fitness": [
+      70.46102417146243,
+      70.77293469115688,
+      70.19622576791288
+    ],
+    "final_population_mean": 47.0,
+    "founder_survival_rate": 0.94,
+    "max_biological_generation": 20,
+    "final_genetic_diversity_mean": 0.014608154085842148,
+    "fitness_aggregation": "mean",
+    "fitness_seed_std": 0.23570215408616013
+  },
+  {
+    "baseline": "fixed_initial_heuristic",
+    "generation": 0,
+    "population_size": 50,
+    "survival_rate": 0.54,
+    "mean_fitness": 58.44168449855138,
+    "best_fitness": 193.32317893085445,
+    "median_fitness": 45.335106969330354,
+    "food_efficiency": 0.187946999571569,
+    "mean_lifetime": 220.53333333333333,
+    "offspring_count": 0,
+    "genetic_diversity": 0.08574320214767217,
+    "evaluation_seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_mean_fitness": [
+      57.72722863326602,
+      57.60391467668828,
+      59.99391018569984
+    ],
+    "final_population_mean": 27.0,
+    "founder_survival_rate": 0.54,
+    "max_biological_generation": 0,
+    "final_genetic_diversity_mean": 0.07648624223574374,
+    "fitness_aggregation": "mean",
+    "fitness_seed_std": 1.0987432277696019
+  },
+  {
+    "baseline": "random",
+    "generation": 0,
+    "population_size": 50,
+    "survival_rate": 0.21333333333333335,
+    "mean_fitness": 25.369302279903362,
+    "best_fitness": 70.92813903384389,
+    "median_fitness": 20.845628966144453,
+    "food_efficiency": 0.13174581984447517,
+    "mean_lifetime": 150.51333333333332,
+    "offspring_count": 0,
+    "genetic_diversity": 0.08574320214767217,
+    "evaluation_seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_mean_fitness": [
+      24.143108182390044,
+      25.341254304720824,
+      26.623544352599218
+    ],
+    "final_population_mean": 10.666666666666666,
+    "founder_survival_rate": 0.21333333333333335,
+    "max_biological_generation": 0,
+    "final_genetic_diversity_mean": 0.08240157428151941,
+    "fitness_aggregation": "mean",
+    "fitness_seed_std": 1.0128280259762328
+  }
+]

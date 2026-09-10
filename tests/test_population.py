@@ -412,3 +412,20 @@ def test_population_200_steps_preserve_unique_occupancy():
         occupied = [c.position for c in env.alive.values()]
         assert len(occupied) == len(set(occupied))
         assert all(0 <= c.energy <= env.config.max_energy for c in env.alive.values())
+
+
+@pytest.mark.parametrize('field, value', [('next_id', 0), ('generation', 99)])
+def test_checkpoint_rejects_inconsistent_counters(tmp_path, field, value):
+    exp = experiment()
+    path = tmp_path/'checkpoint.json'
+    exp.save(path)
+    data = json.loads(path.read_text())
+    data[field] = value
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError):
+        EvolutionExperiment.load(path)
+
+
+def test_selection_rejects_nonfinite_fitness():
+    with pytest.raises(ValueError):
+        tournament([Member(0, Genome())], {0: float('nan')}, random.Random(0))

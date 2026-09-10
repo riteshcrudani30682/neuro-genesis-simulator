@@ -79,3 +79,9 @@ After the creature migration is correct, add multi-creature experiments, genomes
 The market track must remain isolated from live order execution. Historical/paper market data becomes an environment; actions may include `CE`, `PE`, `WAIT`, `EXIT`; reward must account for trade quality, drawdown, overtrading and correct waiting. Compare architectures using walk-forward/out-of-sample evaluation.
 
 Live NBB deterministic risk controls remain authoritative. Neuro-Genesis V2 is research/shadow infrastructure until separately validated.
+
+## Implemented: Evolution + Multi-Agent V2
+
+The creature environment and population milestone are now implemented using the
+shared contracts above. See [Evolution V2](EVOLUTION_V2.md) for actual behavior,
+commands and remaining research limitations. NBB Market Lab remains untouched.

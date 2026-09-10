@@ -116,6 +116,9 @@ def evaluate_population(members, config, seeds, *, policy='heuristic', aggregati
                     'final_population_mean': sum(r['alive'] for r in rows) / len(seeds),
                     'founder_survival_rate': mean(float(r['alive']) for r in rows if r['id'] in scores),
                     'max_biological_generation': max(r['generation'] for r in rows),
+                    'final_genetic_diversity_mean': mean(genetic_diversity(
+                        Genome.from_dict(r['genome']) for r in rows if r['seed'] == seed and r['alive'])
+                        for seed in seeds),
                     'fitness_aggregation': aggregation,
                     'fitness_seed_std': (mean((v-mean(per_seed))**2 for v in per_seed))**0.5})
     return scores, summary, rows
@@ -195,7 +198,9 @@ class EvolutionExperiment:
 
     @classmethod
     def load(cls, path):
-        data = json.loads(Path(path).read_text(encoding='utf-8'))
+        def reject_constant(value):
+            raise ValueError(f'non-finite JSON constant: {value}')
+        data = json.loads(Path(path).read_text(encoding='utf-8'), parse_constant=reject_constant)
         if data.get('schema_version') != 1 or data.get('mode') != 'generational':
             raise ValueError('unsupported checkpoint schema or mode')
         config = dict(data['config'])
@@ -208,6 +213,10 @@ class EvolutionExperiment:
         experiment.generation = data['generation']
         experiment.next_id = data['next_id']
         experiment.metrics = data['metrics']
+        initial_ids = [m.id for m in experiment.initial_members]
+        if (len(initial_ids) != experiment.config.world.population or len(set(initial_ids)) != len(initial_ids)
+                or any(m.generation != 0 for m in experiment.initial_members)):
+            raise ValueError('invalid initial population in checkpoint')
         ids = [m.id for m in experiment.members]
         if (len(ids) != experiment.config.world.population or len(ids) != len(set(ids))
                 or not all(type(i) is int and i >= 0 for i in ids)

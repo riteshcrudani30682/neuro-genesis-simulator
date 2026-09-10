@@ -1,5 +1,6 @@
 """Generational breeding is independent of in-world energy-based reproduction."""
 from dataclasses import dataclass, field, asdict
+import math
 from .genome import Genome
 from .mutation import mutate
 from .selection import tournament
@@ -12,6 +13,20 @@ class Member:
     generation: int = 0
     parent_id: object = None
     mutation_history: list = field(default_factory=list)
+
+    def __post_init__(self):
+        if type(self.id) is not int or self.id < 0 or type(self.generation) is not int or self.generation < 0:
+            raise ValueError('member ID and generation must be nonnegative integers')
+        if self.parent_id is not None and (type(self.parent_id) is not int or self.parent_id < 0):
+            raise ValueError('invalid parent identity')
+        if not isinstance(self.genome, Genome):
+            raise ValueError('member requires an explicit Genome')
+        for change in self.mutation_history:
+            if set(change) != {'gene', 'before', 'after'} or change['gene'] not in Genome.BOUNDS:
+                raise ValueError('invalid mutation summary')
+            low, high = Genome.BOUNDS[change['gene']]
+            if any(not math.isfinite(change[key]) or not low <= change[key] <= high for key in ('before', 'after')):
+                raise ValueError('mutation summary outside genome bounds')
 
     def to_dict(self):
         return asdict(self)

@@ -220,3 +220,17 @@ Q-learning helpers are tested independently, but the main loop does not yet appl
 Q-network actions to the environment. Replay transitions in that loop are still
 placeholders. This is an experimental cellular simulator, not an autonomous
 learning agent. Only load your own trusted `.pkl` saves.
+
+## Evolution + Multi-Agent V2
+
+The shared headless creature world now supports local sensors, simultaneous
+actions, energy, death, reproduction, bounded genomes, mutation, lineage,
+tournament selection, elitism and repeated-seed evaluation.
+
+```bash
+python -m experiments.population_runner --generations 20 --population 50 --seed 42 --compare-baselines
+```
+
+See [Evolution V2 guide](docs/EVOLUTION_V2.md) for continuous mode, observation
+schema, baseline comparisons, passive rendering and JSON checkpoints.
+The standard-library population runner does not require Pygame or PyTorch.
