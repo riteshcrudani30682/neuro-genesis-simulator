@@ -1,0 +1,873 @@
+{
+  "schema_version": 1,
+  "config": {
+    "training_seeds": [
+      11,
+      22,
+      33,
+      44,
+      55
+    ],
+    "heldout_seeds": [
+      101,
+      202,
+      303,
+      404,
+      505
+    ],
+    "updates": 20,
+    "world": {
+      "width": 32,
+      "height": 32,
+      "population": 16,
+      "max_population": 200,
+      "food_count": 180,
+      "hazard_count": 40,
+      "food_regrowth": 3,
+      "sense_radius": 2,
+      "initial_energy": 50.0,
+      "max_energy": 100.0,
+      "basal_cost": 0.25,
+      "movement_cost": 0.35,
+      "food_energy": 12.0,
+      "hazard_damage": 15.0,
+      "max_age": 500,
+      "max_steps": 128,
+      "reproduction_enabled": false,
+      "min_reproduction_energy": 60.0,
+      "reproduction_cost": 30.0,
+      "child_energy": 25.0,
+      "min_reproduction_age": 15,
+      "reproduction_cooldown": 20,
+      "mutation_rate": 0.2
+    },
+    "ppo": {
+      "input_dim": 111,
+      "hidden": 64,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coef": 0.01,
+      "value_coef": 0.5,
+      "max_grad_norm": 0.5,
+      "epochs": 4,
+      "minibatch": 256,
+      "target_kl": 0.03
+    },
+    "device": "cpu",
+    "torch_threads": 2
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+    "torch": "2.14.0+cpu"
+  },
+  "runs": [
+    {
+      "training_seed": 11,
+      "updates": 20,
+      "evaluation": [
+        {
+          "policy": "random",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            16.50008352073424,
+            22.89851442629826,
+            18.854402598498304,
+            21.39125772606597,
+            14.715736738107546
+          ],
+          "mean_fitness": 18.871999001940864,
+          "fitness_seed_std": 3.015304285502048,
+          "mean_reward": 9.478750000000003,
+          "survival_rate": 0.5625
+        },
+        {
+          "policy": "heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            88.52901688038631,
+            90.97464418664853,
+            91.88113050265683,
+            86.90824181923568,
+            91.3919250738399
+          ],
+          "mean_fitness": 89.93699169255345,
+          "fitness_seed_std": 1.9041506464696032,
+          "mean_reward": 58.485624999999985,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "strategy_no_memory",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            91.33000944898546,
+            91.61206288744435,
+            95.92812999661541,
+            96.68789302235255,
+            97.10333239129203
+          ],
+          "mean_fitness": 94.53228554933796,
+          "fitness_seed_std": 2.529331128190195,
+          "mean_reward": 61.74875,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "memory_strategy_heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            92.30600049066383,
+            90.14445156160114,
+            94.3195010082744,
+            90.6647891729018,
+            87.32443378924177
+          ],
+          "mean_fitness": 90.9518352045366,
+          "fitness_seed_std": 2.326681816951213,
+          "mean_reward": 59.303125,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "ppo_untrained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            19.045178664294276,
+            24.542764844951545,
+            15.233330119036484,
+            13.427223717279269,
+            22.835192874362484
+          ],
+          "mean_fitness": 19.016738043984812,
+          "fitness_seed_std": 4.258526137069705,
+          "mean_reward": 9.787875000000005,
+          "survival_rate": 0.6
+        },
+        {
+          "policy": "ppo_trained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            22.943195760436154,
+            29.739047026998875,
+            20.068866189869862,
+            22.269699118388257,
+            28.97821761164793
+          ],
+          "mean_fitness": 24.799805141468216,
+          "fitness_seed_std": 3.8492975832025795,
+          "mean_reward": 13.464375000000013,
+          "survival_rate": 0.675
+        }
+      ]
+    },
+    {
+      "training_seed": 22,
+      "updates": 20,
+      "evaluation": [
+        {
+          "policy": "random",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            16.50008352073424,
+            22.89851442629826,
+            18.854402598498304,
+            21.39125772606597,
+            14.715736738107546
+          ],
+          "mean_fitness": 18.871999001940864,
+          "fitness_seed_std": 3.015304285502048,
+          "mean_reward": 9.478750000000003,
+          "survival_rate": 0.5625
+        },
+        {
+          "policy": "heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            88.52901688038631,
+            90.97464418664853,
+            91.88113050265683,
+            86.90824181923568,
+            91.3919250738399
+          ],
+          "mean_fitness": 89.93699169255345,
+          "fitness_seed_std": 1.9041506464696032,
+          "mean_reward": 58.485624999999985,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "strategy_no_memory",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            91.33000944898546,
+            91.61206288744435,
+            95.92812999661541,
+            96.68789302235255,
+            97.10333239129203
+          ],
+          "mean_fitness": 94.53228554933796,
+          "fitness_seed_std": 2.529331128190195,
+          "mean_reward": 61.74875,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "memory_strategy_heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            92.30600049066383,
+            90.14445156160114,
+            94.3195010082744,
+            90.6647891729018,
+            87.32443378924177
+          ],
+          "mean_fitness": 90.9518352045366,
+          "fitness_seed_std": 2.326681816951213,
+          "mean_reward": 59.303125,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "ppo_untrained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            19.791482048606262,
+            25.782198957036048,
+            17.19142743589762,
+            14.232240115134012,
+            24.365275104480943
+          ],
+          "mean_fitness": 20.272524732230977,
+          "fitness_seed_std": 4.3201091778220935,
+          "mean_reward": 10.669500000000005,
+          "survival_rate": 0.6625
+        },
+        {
+          "policy": "ppo_trained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            21.26240590786617,
+            27.86883411427735,
+            23.253369887317117,
+            22.43074727624462,
+            26.527589183942744
+          ],
+          "mean_fitness": 24.2685892739296,
+          "fitness_seed_std": 2.5103910271388,
+          "mean_reward": 13.043250000000016,
+          "survival_rate": 0.6625
+        }
+      ]
+    },
+    {
+      "training_seed": 33,
+      "updates": 20,
+      "evaluation": [
+        {
+          "policy": "random",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            16.50008352073424,
+            22.89851442629826,
+            18.854402598498304,
+            21.39125772606597,
+            14.715736738107546
+          ],
+          "mean_fitness": 18.871999001940864,
+          "fitness_seed_std": 3.015304285502048,
+          "mean_reward": 9.478750000000003,
+          "survival_rate": 0.5625
+        },
+        {
+          "policy": "heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            88.52901688038631,
+            90.97464418664853,
+            91.88113050265683,
+            86.90824181923568,
+            91.3919250738399
+          ],
+          "mean_fitness": 89.93699169255345,
+          "fitness_seed_std": 1.9041506464696032,
+          "mean_reward": 58.485624999999985,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "strategy_no_memory",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            91.33000944898546,
+            91.61206288744435,
+            95.92812999661541,
+            96.68789302235255,
+            97.10333239129203
+          ],
+          "mean_fitness": 94.53228554933796,
+          "fitness_seed_std": 2.529331128190195,
+          "mean_reward": 61.74875,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "memory_strategy_heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            92.30600049066383,
+            90.14445156160114,
+            94.3195010082744,
+            90.6647891729018,
+            87.32443378924177
+          ],
+          "mean_fitness": 90.9518352045366,
+          "fitness_seed_std": 2.326681816951213,
+          "mean_reward": 59.303125,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "ppo_untrained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            20.158978629837005,
+            26.67339311571435,
+            16.93622581723496,
+            15.899567874441718,
+            26.90465104839557
+          ],
+          "mean_fitness": 21.31456329712472,
+          "fitness_seed_std": 4.686011705710294,
+          "mean_reward": 11.324250000000005,
+          "survival_rate": 0.675
+        },
+        {
+          "policy": "ppo_trained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            23.759880968869197,
+            26.245799361745085,
+            20.244308650773554,
+            21.106378735382837,
+            24.104738892809543
+          ],
+          "mean_fitness": 23.092221321916043,
+          "fitness_seed_std": 2.166573010529417,
+          "mean_reward": 12.29675000000001,
+          "survival_rate": 0.7
+        }
+      ]
+    },
+    {
+      "training_seed": 44,
+      "updates": 20,
+      "evaluation": [
+        {
+          "policy": "random",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            16.50008352073424,
+            22.89851442629826,
+            18.854402598498304,
+            21.39125772606597,
+            14.715736738107546
+          ],
+          "mean_fitness": 18.871999001940864,
+          "fitness_seed_std": 3.015304285502048,
+          "mean_reward": 9.478750000000003,
+          "survival_rate": 0.5625
+        },
+        {
+          "policy": "heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            88.52901688038631,
+            90.97464418664853,
+            91.88113050265683,
+            86.90824181923568,
+            91.3919250738399
+          ],
+          "mean_fitness": 89.93699169255345,
+          "fitness_seed_std": 1.9041506464696032,
+          "mean_reward": 58.485624999999985,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "strategy_no_memory",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            91.33000944898546,
+            91.61206288744435,
+            95.92812999661541,
+            96.68789302235255,
+            97.10333239129203
+          ],
+          "mean_fitness": 94.53228554933796,
+          "fitness_seed_std": 2.529331128190195,
+          "mean_reward": 61.74875,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "memory_strategy_heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            92.30600049066383,
+            90.14445156160114,
+            94.3195010082744,
+            90.6647891729018,
+            87.32443378924177
+          ],
+          "mean_fitness": 90.9518352045366,
+          "fitness_seed_std": 2.326681816951213,
+          "mean_reward": 59.303125,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "ppo_untrained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            21.708557536065747,
+            24.549014844951547,
+            17.19142743589762,
+            14.232240115134012,
+            26.197084823563813
+          ],
+          "mean_fitness": 20.775664951122547,
+          "fitness_seed_std": 4.475788613850742,
+          "mean_reward": 10.936000000000005,
+          "survival_rate": 0.6375
+        },
+        {
+          "policy": "ppo_trained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            20.467404909028886,
+            17.87992557880353,
+            19.71138131219143,
+            23.8697833938703,
+            26.636332826530708
+          ],
+          "mean_fitness": 21.71296560408497,
+          "fitness_seed_std": 3.1350076473087154,
+          "mean_reward": 11.781750000000008,
+          "survival_rate": 0.7125
+        }
+      ]
+    },
+    {
+      "training_seed": 55,
+      "updates": 20,
+      "evaluation": [
+        {
+          "policy": "random",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            16.50008352073424,
+            22.89851442629826,
+            18.854402598498304,
+            21.39125772606597,
+            14.715736738107546
+          ],
+          "mean_fitness": 18.871999001940864,
+          "fitness_seed_std": 3.015304285502048,
+          "mean_reward": 9.478750000000003,
+          "survival_rate": 0.5625
+        },
+        {
+          "policy": "heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            88.52901688038631,
+            90.97464418664853,
+            91.88113050265683,
+            86.90824181923568,
+            91.3919250738399
+          ],
+          "mean_fitness": 89.93699169255345,
+          "fitness_seed_std": 1.9041506464696032,
+          "mean_reward": 58.485624999999985,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "strategy_no_memory",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            91.33000944898546,
+            91.61206288744435,
+            95.92812999661541,
+            96.68789302235255,
+            97.10333239129203
+          ],
+          "mean_fitness": 94.53228554933796,
+          "fitness_seed_std": 2.529331128190195,
+          "mean_reward": 61.74875,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "memory_strategy_heuristic",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            92.30600049066383,
+            90.14445156160114,
+            94.3195010082744,
+            90.6647891729018,
+            87.32443378924177
+          ],
+          "mean_fitness": 90.9518352045366,
+          "fitness_seed_std": 2.326681816951213,
+          "mean_reward": 59.303125,
+          "survival_rate": 1.0
+        },
+        {
+          "policy": "ppo_untrained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            20.664050627595795,
+            25.561303319764804,
+            16.81570769813033,
+            15.899567874441718,
+            24.16838382031337
+          ],
+          "mean_fitness": 20.621802668049202,
+          "fitness_seed_std": 3.8409517001383655,
+          "mean_reward": 10.888500000000006,
+          "survival_rate": 0.6625
+        },
+        {
+          "policy": "ppo_trained",
+          "seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "seed_fitness": [
+            19.50077194450585,
+            30.662866749311263,
+            22.189018993722954,
+            14.397029496539327,
+            27.830839483679338
+          ],
+          "mean_fitness": 22.916105333551748,
+          "fitness_seed_std": 5.81265402410632,
+          "mean_reward": 12.071875000000007,
+          "survival_rate": 0.6625
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy": "random",
+      "mean_fitness": 18.871999001940864,
+      "median_fitness": 18.871999001940864,
+      "training_seed_std": 0.0,
+      "per_training_seed_mean": [
+        18.871999001940864,
+        18.871999001940864,
+        18.871999001940864,
+        18.871999001940864,
+        18.871999001940864
+      ]
+    },
+    {
+      "policy": "heuristic",
+      "mean_fitness": 89.93699169255345,
+      "median_fitness": 89.93699169255345,
+      "training_seed_std": 0.0,
+      "per_training_seed_mean": [
+        89.93699169255345,
+        89.93699169255345,
+        89.93699169255345,
+        89.93699169255345,
+        89.93699169255345
+      ]
+    },
+    {
+      "policy": "strategy_no_memory",
+      "mean_fitness": 94.53228554933796,
+      "median_fitness": 94.53228554933796,
+      "training_seed_std": 0.0,
+      "per_training_seed_mean": [
+        94.53228554933796,
+        94.53228554933796,
+        94.53228554933796,
+        94.53228554933796,
+        94.53228554933796
+      ]
+    },
+    {
+      "policy": "memory_strategy_heuristic",
+      "mean_fitness": 90.9518352045366,
+      "median_fitness": 90.9518352045366,
+      "training_seed_std": 0.0,
+      "per_training_seed_mean": [
+        90.9518352045366,
+        90.9518352045366,
+        90.9518352045366,
+        90.9518352045366,
+        90.9518352045366
+      ]
+    },
+    {
+      "policy": "ppo_untrained",
+      "mean_fitness": 20.40025873850245,
+      "median_fitness": 20.621802668049202,
+      "training_seed_std": 0.7689486135792137,
+      "per_training_seed_mean": [
+        19.016738043984812,
+        20.272524732230977,
+        21.31456329712472,
+        20.775664951122547,
+        20.621802668049202
+      ]
+    },
+    {
+      "policy": "ppo_trained",
+      "mean_fitness": 23.357937334990115,
+      "median_fitness": 23.092221321916043,
+      "training_seed_std": 1.084437387572772,
+      "per_training_seed_mean": [
+        24.799805141468216,
+        24.2685892739296,
+        23.092221321916043,
+        21.71296560408497,
+        22.916105333551748
+      ]
+    }
+  ],
+  "paired_comparisons": {
+    "ppo_trained_minus_ppo_untrained": {
+      "unit": "training_seed_mean_over_heldout_worlds",
+      "n": 5,
+      "mean_delta": 2.9576785964876633,
+      "median_delta": 2.2943026655025456,
+      "std_delta": 1.7306362276856926,
+      "positive_runs": 5,
+      "per_unit_delta": [
+        5.7830670974834035,
+        3.9960645416986225,
+        1.7776580247913216,
+        0.9373006529624242,
+        2.2943026655025456
+      ],
+      "bootstrap_95_percent_interval": [
+        1.5448440042020075,
+        4.624584771788031
+      ]
+    },
+    "ppo_trained_minus_heuristic": {
+      "unit": "training_seed_mean_over_heldout_worlds",
+      "n": 5,
+      "mean_delta": -66.57905435756334,
+      "median_delta": -66.8447703706374,
+      "std_delta": 1.0844373875727704,
+      "positive_runs": 0,
+      "per_unit_delta": [
+        -65.13718655108524,
+        -65.66840241862386,
+        -66.8447703706374,
+        -68.22402608846848,
+        -67.02088635900171
+      ],
+      "bootstrap_95_percent_interval": [
+        -67.4722734086062,
+        -65.62016968617625
+      ]
+    },
+    "memory_strategy_heuristic_minus_strategy_no_memory": {
+      "unit": "heldout_world_seed",
+      "n": 5,
+      "mean_delta": -3.580450344801372,
+      "median_delta": -1.6086289883410103,
+      "std_delta": 3.8340746792888214,
+      "positive_runs": 1,
+      "per_unit_delta": [
+        0.9759910416783697,
+        -1.4676113258432082,
+        -1.6086289883410103,
+        -6.023103849450749,
+        -9.778898602050262
+      ],
+      "bootstrap_95_percent_interval": [
+        -6.876761722784633,
+        -0.5183739113341375
+      ]
+    }
+  },
+  "limitations": [
+    "Small training-seed count; bootstrap intervals are descriptive.",
+    "Intervals condition on the fixed heldout worlds, not all possible worlds.",
+    "Heuristic and memory baselines are repeated controls, not independent training runs.",
+    "Fresh evaluation memories; no LLM; no reproduction; no heldout tuning."
+  ]
+}

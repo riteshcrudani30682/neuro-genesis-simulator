@@ -74,7 +74,8 @@ machine running Python, configurable with `--endpoint`.
 A strategy request occurs at the first decision, then only after a minimum 20
 ticks when low-energy/food/hazard/crowding conditions change, or after 80 ticks.
 All agents in the demo share a **10-request budget for the session**, including
-failed attempts. Requests are synchronous and bounded by a 10-second HTTP timeout;
+failed attempts. Requests are synchronous with a default 10-second HTTP timeout
+(`--llm-timeout` can raise it to 60 seconds);
 the first implementation may pause the viewer during a local inference. It is
 not an asynchronous real-time scheduler. With a small shared budget, early agents
 may consume requests before later agents; later agents use labeled rule fallback.
@@ -145,7 +146,8 @@ external Ollama state or persistent demo memory files.
 
 [Measured training and evaluation records](results/strategy-ppo/README.md) contain
 20 actual updates and comparisons over heldout seeds 101/202/303. Training world
-seeds are negative and disjoint. Evaluation is frozen, uses fresh memory, and
+seeds use disjoint magnitude ranges (Python aliases negative and positive integer seeds).
+Overlap is explicitly rejected. Evaluation is frozen, uses fresh memory, and
 never changes the trained weights or trainer RNG. Comparisons include random,
 plain heuristic, goal-based heuristic with memory disabled/enabled, untrained PPO
 and trained PPO.
@@ -153,5 +155,7 @@ and trained PPO.
 One training seed plus three evaluation worlds cannot establish statistical
 significance or general intelligence. There is no fabricated emergent behavior,
 no promise that memory or an LLM is better, and no financial applicability claim.
-Longer training, independent training seeds, stronger task curricula and actual
+The follow-up [five-training-seed benchmark and PC validator](REPEATED_PPO_OLLAMA.md)
+are now available, including unfavorable memory-ablation results.
+Longer training, stronger task curricula and actual
 local-LLM ablations are the next research steps.

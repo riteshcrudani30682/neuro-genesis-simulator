@@ -14,6 +14,13 @@ from worlds.creature.entities import WorldConfig
 from experiments.population_runner import append_rows, run_population_episode, write_json
 
 
+def validate_seed_split(seed, first_update, updates, heldout_seeds):
+    """Python Random treats -n and n identically: signs do not isolate worlds."""
+    start = abs(seed)*1_000_003 + first_update + 1
+    if any(start <= abs(heldout) < start + updates for heldout in heldout_seeds):
+        raise ValueError('training worlds overlap heldout seed magnitudes; choose another training seed')
+
+
 def collect_episode(trainer, config, seed):
     """One shared world, one batched policy call per tick, separate GAE per creature."""
     config = replace(config, reproduction_enabled=False)
@@ -95,8 +102,12 @@ def main(argv=None):
                             max_steps=args.steps, reproduction_enabled=False)
         trainer = PPOTrainer(seed=args.seed, device=args.device)
         seed = args.seed
+    try:
+        validate_seed_split(seed, trainer.updates, args.updates, (101, 202, 303))
+    except ValueError as exc:
+        parser.error(str(exc))
     for _ in range(args.updates):
-        # Negative training seeds cannot overlap default positive heldout seeds.
+        # Magnitude ranges, not merely negative signs, isolate training worlds.
         episode_seed = -(abs(seed)*1_000_003 + trainer.updates + 1)
         trajectories, rows = collect_episode(trainer, world, episode_seed)
         metrics = trainer.update(trajectories)

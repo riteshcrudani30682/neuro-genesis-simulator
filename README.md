@@ -247,3 +247,18 @@ It shows selected creature goals, persistent experience, generation, energy and
 planner source. Default rules work offline; Ollama is explicit opt-in. Real PPO
 training, frozen evaluation, a small demo checkpoint and memory ablation are
 available. See [Memory / Strategy / PPO guide](docs/MEMORY_STRATEGY_PPO.md).
+
+### Repeated training + live Ollama validation
+
+Five independent training seeds and five heldout worlds have been evaluated:
+PPO mean fitness **20.40 → 23.36**, plain heuristic **89.94**. Memory did not improve
+the matched rule-strategy baseline in this experiment.
+
+On Windows, open Ollama and double-click **`VALIDATE_OLLAMA.bat`** in this folder.
+Choose an installed model number. The validator prints the location of `report.json`
+with actual LLM responses, fallbacks, latency, token usage, VRAM allocation and memory checks.
+It needs Python only; it does not install models. Windows/live-model validation is
+pending until this is run on your PC; automated HTTP fixtures are not model evidence.
+
+See [validation and benchmark instructions](docs/REPEATED_PPO_OLLAMA.md) and
+[measured results](docs/results/repeated-ppo/README.md).

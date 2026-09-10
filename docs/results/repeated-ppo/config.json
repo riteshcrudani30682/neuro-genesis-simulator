@@ -1,0 +1,58 @@
+{
+  "training_seeds": [
+    11,
+    22,
+    33,
+    44,
+    55
+  ],
+  "heldout_seeds": [
+    101,
+    202,
+    303,
+    404,
+    505
+  ],
+  "updates": 20,
+  "world": {
+    "width": 32,
+    "height": 32,
+    "population": 16,
+    "max_population": 200,
+    "food_count": 180,
+    "hazard_count": 40,
+    "food_regrowth": 3,
+    "sense_radius": 2,
+    "initial_energy": 50.0,
+    "max_energy": 100.0,
+    "basal_cost": 0.25,
+    "movement_cost": 0.35,
+    "food_energy": 12.0,
+    "hazard_damage": 15.0,
+    "max_age": 500,
+    "max_steps": 128,
+    "reproduction_enabled": false,
+    "min_reproduction_energy": 60.0,
+    "reproduction_cost": 30.0,
+    "child_energy": 25.0,
+    "min_reproduction_age": 15,
+    "reproduction_cooldown": 20,
+    "mutation_rate": 0.2
+  },
+  "ppo": {
+    "input_dim": 111,
+    "hidden": 64,
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_ratio": 0.2,
+    "entropy_coef": 0.01,
+    "value_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "epochs": 4,
+    "minibatch": 256,
+    "target_kl": 0.03
+  },
+  "device": "cpu",
+  "torch_threads": 2
+}

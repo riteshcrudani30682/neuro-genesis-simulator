@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import json
 import math
+from time import perf_counter
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -70,8 +71,17 @@ class OllamaPlanner:
         self.model, self.endpoint, self.timeout = model, endpoint.rstrip('/'), timeout
         self.transport = transport
         self.last_usage = {}
+        self.last_latency_s = 0.0
 
     def plan(self, context):
+        self.last_usage = {}
+        started = perf_counter()
+        try:
+            return self._plan(context)
+        finally:
+            self.last_latency_s = perf_counter() - started
+
+    def _plan(self, context):
         payload = {'model': self.model, 'stream': False, 'format': 'json', 'think': False,
                    'keep_alive': '5m', 'options': {'temperature': 0, 'num_predict': 96, 'num_ctx': 2048},
                    'messages': [{'role': 'system', 'content': STATIC_INSTRUCTIONS},
@@ -154,7 +164,8 @@ class StrategyController:
         self.events.append({'tick': tick, 'goal': decision.goal, 'confidence': decision.confidence,
                             'reason': decision.reason, 'source': source, 'error': error,
                             'request_attempted': attempted,
-                            'usage': getattr(planner, 'last_usage', {}) if attempted and not error else {}})
+                            'latency_s': getattr(planner, 'last_latency_s', None) if attempted else None,
+                            'usage': getattr(planner, 'last_usage', {}) if attempted else {}})
         self.events = self.events[-128:]
         return self.goal
 

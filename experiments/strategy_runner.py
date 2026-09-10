@@ -79,13 +79,14 @@ def main(argv=None):
     parser.add_argument('--planner', choices=('rules', 'ollama'), default='rules')
     parser.add_argument('--model', help='Explicit installed Ollama model name; no downloads are triggered')
     parser.add_argument('--endpoint', default='http://127.0.0.1:11434')
+    parser.add_argument('--llm-timeout', type=float, default=10, help='Per-call timeout in seconds, maximum 60')
     parser.add_argument('--max-calls', type=int, default=10)
     parser.add_argument('--ppo-checkpoint', type=Path)
     parser.add_argument('--render', action='store_true')
     args = parser.parse_args(argv)
     if args.planner == 'ollama' and not args.model:
         parser.error('--model is required with --planner ollama')
-    planner = OllamaPlanner(args.model, endpoint=args.endpoint) if args.planner == 'ollama' else None
+    planner = OllamaPlanner(args.model, endpoint=args.endpoint, timeout=args.llm_timeout) if args.planner == 'ollama' else None
     trainer = None
     if args.ppo_checkpoint:
         from brains.ppo import PPOTrainer
