@@ -46,5 +46,6 @@ python -m experiments.strategy_runner --render --ppo-checkpoint docs/results/rep
 The viewer enables ongoing reproduction and persistent memory, unlike this frozen
 benchmark, so its displayed fitness is not directly comparable to the table.
 
-Live Ollama/Windows validation is still pending. Use `VALIDATE_OLLAMA.bat` on the PC.
+A [user-supplied Windows Ollama report](../ollama-windows/README.md) now passes live
+validation. This does not change the PPO or memory-ablation results above.
 See [protocol and reproduction instructions](../../REPEATED_PPO_OLLAMA.md).

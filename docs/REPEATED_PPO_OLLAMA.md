@@ -1,7 +1,8 @@
 # Repeated PPO training and live Ollama validation
 
 This extends the existing V2 core. NBB is unchanged. The measured Linux CPU
-benchmark is complete; actual Windows/Ollama validation must be run on the user's PC.
+benchmark is complete. The user has supplied a passing Windows/Ollama report; see
+[actual PC results](results/ollama-windows/README.md).
 
 ## Windows: validate an installed Ollama model
 
@@ -110,4 +111,7 @@ HTTP adapter: discovery, requests, JSON parsing, failures, token accounting,
 cooldowns and memory persistence. These fixtures are not an Ollama model.
 The development workspace's real localhost probe returned `blocked` because no
 Ollama service was available. No direct Windows PC connector was available either.
-An actual PC-generated report is still required to complete live validation.
+A subsequently supplied Windows report passes all checks with `ornith-9b-32k:latest`.
+Its three requests took 50.47, 1.63 and 1.65 seconds. This closes the reported live
+protocol/integration check; it is not an independent PC execution by Codex or a
+strategy-quality benchmark. See [the report and limits](results/ollama-windows/README.md).

@@ -257,8 +257,10 @@ the matched rule-strategy baseline in this experiment.
 On Windows, open Ollama and double-click **`VALIDATE_OLLAMA.bat`** in this folder.
 Choose an installed model number. The validator prints the location of `report.json`
 with actual LLM responses, fallbacks, latency, token usage, VRAM allocation and memory checks.
-It needs Python only; it does not install models. Windows/live-model validation is
-pending until this is run on your PC; automated HTTP fixtures are not model evidence.
+It needs Python only; it does not install models. A user-supplied Windows report now
+confirms a live pass with `ornith-9b-32k:latest`: 3/3 LLM responses and memory checks.
+See [PC validation evidence and launch command](docs/results/ollama-windows/README.md).
+Automated HTTP fixtures remain separate from actual model evidence.
 
 See [validation and benchmark instructions](docs/REPEATED_PPO_OLLAMA.md) and
 [measured results](docs/results/repeated-ppo/README.md).

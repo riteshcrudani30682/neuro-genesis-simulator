@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "started_utc": "2026-09-10T05:42:22.235323+00:00",
+  "runtime": {
+    "system": "Windows",
+    "release": "10",
+    "python": "3.10.11",
+    "cpu_count": 20
+  },
+  "model": "ornith-9b-32k:latest",
+  "request_budget": 3,
+  "timeout_seconds": 60,
+  "checks": {
+    "discovery": true,
+    "all_requests_accepted_as_llm": true,
+    "bounded_calls": true,
+    "cooldown": true,
+    "world_transitions": true,
+    "memory_round_trip": true
+  },
+  "events": [
+    {
+      "tick": 0,
+      "goal": "explore",
+      "confidence": 0.5,
+      "reason": "No food detected and no hazards or creatures present, so exploring to find resources is a reasonable choice.",
+      "source": "llm",
+      "error": null,
+      "request_attempted": true,
+      "latency_s": 50.47447279999869,
+      "usage": {
+        "prompt_eval_count": 496,
+        "eval_count": 49
+      }
+    },
+    {
+      "tick": 20,
+      "goal": "explore",
+      "confidence": 0.95,
+      "reason": "Energy is high, food is abundant, no hazards or competitors detected, and recent episodes show no negative outcomes\u2014safe to continue exploring.",
+      "source": "llm",
+      "error": null,
+      "request_attempted": true,
+      "latency_s": 1.6287644000003638,
+      "usage": {
+        "prompt_eval_count": 572,
+        "eval_count": 57
+      }
+    },
+    {
+      "tick": 40,
+      "goal": "explore",
+      "confidence": 0.85,
+      "reason": "Energy is full, no food or hazards detected, and recent episodes show no strong signal for food or danger, so continuing to explore is the best choice.",
+      "source": "llm",
+      "error": null,
+      "request_attempted": true,
+      "latency_s": 1.6504043999993883,
+      "usage": {
+        "prompt_eval_count": 554,
+        "eval_count": 61
+      }
+    }
+  ],
+  "scope": "Live protocol and integration check, not an LLM performance benchmark.",
+  "ollama_version": "0.33.3",
+  "model_digest": "97280979a06fc78078d0864a938069f5d8f176413c5c49f59f0e11863d595e98",
+  "model_size_bytes": 5629112228,
+  "actual_requests": 3,
+  "world_steps": 60,
+  "latency_seconds": {
+    "first_request": 50.47447279999869,
+    "mean": 17.917880533332816,
+    "max": 50.47447279999869
+  },
+  "default_demo_timeout_compatible": false,
+  "token_totals": {
+    "prompt_eval_count": 1622,
+    "eval_count": 167
+  },
+  "loaded_model": [
+    {
+      "name": "ornith-9b-32k:latest",
+      "size": 5260202475,
+      "size_vram": 5260202475,
+      "context_length": 2048
+    }
+  ],
+  "provenance": {
+    "source": "User-supplied report.json from Windows PC",
+    "omitted_fields": [
+      "available_models"
+    ],
+    "verification": "Reviewed report consistency; not independently executed on the PC by Codex."
+  }
+}
