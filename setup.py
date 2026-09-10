@@ -20,6 +20,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/riteshcrudani30682/neuro-genesis-simulator",
+    packages=find_packages(exclude=["tests", "tests.*"]),
     py_modules=["main", "neuro_genesis_sim", "control_panel",
                 "neuro_ca_sim", "creature_sim", "creature_rl_ns"],
     classifiers=[
