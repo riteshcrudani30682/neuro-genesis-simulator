@@ -1,0 +1,132 @@
+{
+  "evidence_kind": "hermetic_transport_fixture_not_live_ollama",
+  "world_config": {
+    "width": 32,
+    "height": 32,
+    "population": 12,
+    "max_population": 200,
+    "food_count": 180,
+    "hazard_count": 40,
+    "food_regrowth": 3,
+    "sense_radius": 2,
+    "initial_energy": 50.0,
+    "max_energy": 100.0,
+    "basal_cost": 0.25,
+    "movement_cost": 0.35,
+    "food_energy": 12.0,
+    "hazard_damage": 15.0,
+    "max_age": 500,
+    "max_steps": 200,
+    "reproduction_enabled": true,
+    "min_reproduction_energy": 60.0,
+    "reproduction_cost": 30.0,
+    "child_energy": 25.0,
+    "min_reproduction_age": 15,
+    "reproduction_cooldown": 20,
+    "mutation_rate": 0.2
+  },
+  "total_attempts": 10,
+  "distinct_recipients": 10,
+  "episodes": [
+    {
+      "run_id": "739157e2820a45d8a93323ec50dd5fab",
+      "session": 0,
+      "episode": 1,
+      "episode_seed": 42,
+      "interrupted": false,
+      "llm_quota": 5,
+      "call_gap_world_ticks": 40,
+      "sources": {
+        "scheduled_fallback": 494,
+        "llm": 5,
+        "attempts": 5,
+        "episode_budget_fallback": 167
+      },
+      "known_token_totals": {
+        "prompt_eval_count": 500,
+        "eval_count": 100
+      }
+    },
+    {
+      "run_id": "739157e2820a45d8a93323ec50dd5fab",
+      "session": 0,
+      "episode": 2,
+      "episode_seed": 43,
+      "interrupted": false,
+      "llm_quota": 5,
+      "call_gap_world_ticks": 40,
+      "sources": {
+        "scheduled_fallback": 464,
+        "llm": 5,
+        "attempts": 5,
+        "budget_fallback": 144
+      },
+      "known_token_totals": {
+        "prompt_eval_count": 500,
+        "eval_count": 100
+      }
+    }
+  ],
+  "requests": [
+    {
+      "episode": 1,
+      "world_tick": 0,
+      "owner": "creature-strategy-v1:founder:9",
+      "source": "llm"
+    },
+    {
+      "episode": 1,
+      "world_tick": 40,
+      "owner": "creature-strategy-v1:founder:10",
+      "source": "llm"
+    },
+    {
+      "episode": 1,
+      "world_tick": 80,
+      "owner": "creature-strategy-v1:founder:5",
+      "source": "llm"
+    },
+    {
+      "episode": 1,
+      "world_tick": 120,
+      "owner": "creature-strategy-v1:founder:0",
+      "source": "llm"
+    },
+    {
+      "episode": 1,
+      "world_tick": 160,
+      "owner": "creature-strategy-v1:founder:3",
+      "source": "llm"
+    },
+    {
+      "episode": 2,
+      "world_tick": 0,
+      "owner": "creature-strategy-v1:founder:1",
+      "source": "llm"
+    },
+    {
+      "episode": 2,
+      "world_tick": 40,
+      "owner": "creature-strategy-v1:founder:11",
+      "source": "llm"
+    },
+    {
+      "episode": 2,
+      "world_tick": 80,
+      "owner": "creature-strategy-v1:founder:7",
+      "source": "llm"
+    },
+    {
+      "episode": 2,
+      "world_tick": 120,
+      "owner": "creature-strategy-v1:founder:2",
+      "source": "llm"
+    },
+    {
+      "episode": 2,
+      "world_tick": 160,
+      "owner": "creature-strategy-v1:founder:4",
+      "source": "llm"
+    }
+  ]
+}

@@ -62,7 +62,7 @@ class ExperienceMemory:
     def finish_episode(self, *, reward, steps, outcome):
         if not math.isfinite(reward) or type(steps) is not int or steps < 0:
             raise ValueError('invalid episode summary')
-        if outcome not in ('done', 'interrupted'):
+        if outcome not in ('done', 'interrupted', 'died', 'time_limit', 'ended_unspecified'):
             raise ValueError('invalid outcome')
         if not self.enabled:
             return
@@ -71,8 +71,11 @@ class ExperienceMemory:
 
     def context(self, state):
         """Small structured retrieval, not a growing conversation transcript."""
-        return {'transitions_seen': self.transitions, 'action_values': self.action_values(state),
-                'recent_episodes': self.episodes[-3:]}
+        return {'schema': 'empirical-movement-memory-v2', 'transitions_seen': self.transitions,
+                'movement_action_values': {a.name: v for a, v in zip(Action, self.action_values(state))},
+                'recent_episodes': [{'reward': e['reward'], 'steps': e['steps'],
+                                     'end_reason': 'ended_unspecified' if e['outcome'] == 'done' else e['outcome']}
+                                    for e in self.episodes[-3:]]}
 
     def to_dict(self):
         return {'schema_version': self.SCHEMA, 'sensor_schema': self.SENSOR_SCHEMA,

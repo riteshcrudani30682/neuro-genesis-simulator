@@ -47,7 +47,7 @@ class ExperimentConfig:
 
 
 def run_population_episode(config, members, seed, *, policy='heuristic', policy_factory=None,
-                           replay=None, frame_callback=None):
+                           replay=None, frame_callback=None, before_actions=None):
     """Policies see the same pre-step world. Training hooks receive true transitions.
 
     A custom factory receives (Creature, policy_seed) and returns a core.Agent.
@@ -68,10 +68,15 @@ def run_population_episode(config, members, seed, *, policy='heuristic', policy_
                     next_slot += 1
                 # Reset episode seeds per slot, not lineage ID, for fair generation comparisons.
                 policies[i] = factory(env.creatures[i], seed * 1_000_003 + policy_slots[i])
+        if before_actions:
+            before_actions(observations, policies, env.step_count)
         actions = {i: policies[i].act(observations[i], explore=True) for i in sorted(observations)}
         result = env.step(actions)
         for i, t in result.transitions.items():
-            policies[i].observe(t.state, t.action, t.reward, t.next_state, t.done)
+            if hasattr(policies[i], 'observe_transition'):
+                policies[i].observe_transition(t, terminated=result.terminated[i], truncated=result.truncated)
+            else:
+                policies[i].observe(t.state, t.action, t.reward, t.next_state, t.done)
             if replay is not None:
                 replay.append(t)
             if result.terminated[i]:

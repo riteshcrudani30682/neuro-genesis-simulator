@@ -1,5 +1,6 @@
 """A slow high-level goal planner above local controllers. No arbitrary actions/code."""
 from dataclasses import dataclass
+import hashlib
 import json
 import math
 from time import perf_counter
@@ -10,13 +11,31 @@ from worlds.creature.entities import Action, DELTAS
 from .baseline import RandomAgent
 
 GOALS = ('seek_food', 'avoid_competition', 'explore', 'protect_energy')
+PROMPT_VERSION = 'strategy-v2'
+GOAL_SCHEMA = {'type': 'object', 'additionalProperties': False,
+               'properties': {'goal': {'type': 'string', 'enum': list(GOALS)},
+                              'confidence': {'type': 'number', 'minimum': 0, 'maximum': 1},
+                              'reason': {'type': 'string', 'minLength': 1, 'maxLength': 240}},
+               'required': ['goal', 'confidence', 'reason']}
 STATIC_INSTRUCTIONS = (
     'You select one high-level goal for a simulated creature. Input contains only local senses '
     'and empirical memory, not a world map. Return JSON with exactly goal, confidence, reason. '
     'goal must be seek_food, avoid_competition, explore, or protect_energy. '
-    'confidence is 0..1; reason is a short plain summary. Do not return movement actions, '
-    'code, tools, commands, or claims of intelligence.'
+    'confidence is 0..1; reason is one sentence, preferably under 120 characters (maximum 240). '
+    'Energy is a fraction: 0.5 means half full, below 0.3 means low. Age is a fraction of maximum age. '
+    'Food, hazards and creatures are counts of locally visible cells, not global abundance. '
+    'Memory end_reason means why an episode stopped, NEVER success. Legacy done means unknown ending. '
+    'Positive episode reward does not prove any particular goal worked. Movement action values '
+    'are empirical immediate rewards for UP/DOWN/LEFT/RIGHT/STAY, NOT goal scores or confidence. '
+    'Do not infer exploration success from episode totals or fabricate causal explanations. '
+    'Do not return movement actions, code, tools, commands, or claims of intelligence.'
 )
+
+
+class StrategyResponseError(ValueError):
+    def __init__(self, code):
+        super().__init__(code)
+        self.code = code
 
 
 @dataclass(frozen=True)
@@ -29,19 +48,22 @@ class GoalDecision:
     def parse(cls, data):
         if isinstance(data, str):
             if len(data) > 2048:
-                raise ValueError('oversized strategy response')
-            data = json.loads(data)
+                raise StrategyResponseError('response_too_large')
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as exc:
+                raise StrategyResponseError('malformed_json') from exc
         if not isinstance(data, dict) or set(data) != {'goal', 'confidence', 'reason'}:
-            raise ValueError('unexpected strategy fields')
+            raise StrategyResponseError('unexpected_fields')
         if data['goal'] not in GOALS:
-            raise ValueError('invalid goal')
+            raise StrategyResponseError('invalid_goal')
         confidence = data['confidence']
         if isinstance(confidence, bool) or not isinstance(confidence, (int, float)):
-            raise ValueError('confidence must be numeric')
+            raise StrategyResponseError('confidence_not_numeric')
         if not math.isfinite(confidence) or not 0 <= confidence <= 1:
-            raise ValueError('invalid confidence')
+            raise StrategyResponseError('confidence_out_of_range')
         if not isinstance(data['reason'], str) or not 1 <= len(data['reason']) <= 240:
-            raise ValueError('reason must contain 1..240 characters')
+            raise StrategyResponseError('reason_length_or_type')
         return cls(**data)
 
 
@@ -72,9 +94,11 @@ class OllamaPlanner:
         self.transport = transport
         self.last_usage = {}
         self.last_latency_s = 0.0
+        self.last_diagnostics = {}
 
     def plan(self, context):
         self.last_usage = {}
+        self.last_diagnostics = {}
         started = perf_counter()
         try:
             return self._plan(context)
@@ -82,13 +106,13 @@ class OllamaPlanner:
             self.last_latency_s = perf_counter() - started
 
     def _plan(self, context):
-        payload = {'model': self.model, 'stream': False, 'format': 'json', 'think': False,
-                   'keep_alive': '5m', 'options': {'temperature': 0, 'num_predict': 96, 'num_ctx': 2048},
+        payload = {'model': self.model, 'stream': False, 'format': GOAL_SCHEMA, 'think': False,
+                   'keep_alive': '5m', 'options': {'temperature': 0, 'num_predict': 160, 'num_ctx': 2048},
                    'messages': [{'role': 'system', 'content': STATIC_INSTRUCTIONS},
                                 {'role': 'user', 'content': json.dumps(context, allow_nan=False)}]}
         raw = json.dumps(payload).encode()
         if len(raw) > 8000:
-            raise ValueError('strategy input budget exceeded')
+            raise StrategyResponseError('input_budget_exceeded')
         if self.transport:
             response = self.transport(payload)
         else:
@@ -96,11 +120,30 @@ class OllamaPlanner:
             with urlopen(request, timeout=self.timeout) as handle:
                 data = handle.read(65537)
             if len(data) > 65536:
-                raise ValueError('oversized Ollama response')
+                raise StrategyResponseError('http_response_too_large')
             response = json.loads(data)
+        if not isinstance(response, dict):
+            raise StrategyResponseError('invalid_response_envelope')
         self.last_usage = {key: response[key] for key in ('prompt_eval_count', 'eval_count')
                            if type(response.get(key)) is int and response[key] >= 0}
-        return GoalDecision.parse(response['message']['content'])
+        content = response.get('message', {}).get('content') if isinstance(response.get('message'), dict) else None
+        self.last_diagnostics = {'done_reason': str(response.get('done_reason', 'unknown'))[:64],
+                                 'output_limit': 160,
+                                 'possible_output_truncation': response.get('done_reason') == 'length'
+                                 or self.last_usage.get('eval_count', 0) >= 160}
+        if not isinstance(content, str):
+            raise StrategyResponseError('missing_text_content')
+        self.last_diagnostics.update({'response_characters': len(content),
+                                      'response_sha256': hashlib.sha256(content.encode()).hexdigest()})
+        try:
+            if response.get('done') is False or response.get('done_reason') == 'length':
+                raise StrategyResponseError('incomplete_generation')
+            return GoalDecision.parse(content)
+        except ValueError:
+            # Bounded diagnostic text only. Never executed or sent back as instructions.
+            self.last_diagnostics['rejected_excerpt'] = content[:512]
+            self.last_diagnostics['excerpt_truncated'] = len(content) > 512
+            raise
 
 
 @dataclass
@@ -130,43 +173,83 @@ class StrategyController:
         self.last_tick = None
         self.last_signature = None
         self.events = []
+        self.scheduler = None
+        self.world_tick = None
+        self.event_sink = None
+        self.request_pending = False
+        self.last_attempt_tick = None
+
+    @staticmethod
+    def senses(state):
+        return {'energy': round(state.energy, 3), 'age': round(state.age, 3),
+                'food': sum(c[2] for c in state.cells), 'hazards': sum(c[3] for c in state.cells),
+                'creatures': sum(c[4] for c in state.cells)}
+
+    def is_due(self, state, tick):
+        senses = self.senses(state)
+        signature = (state.energy < .3, bool(senses['food']), bool(senses['hazards']), senses['creatures'] > 3)
+        elapsed = 0 if self.last_tick is None else tick - self.last_tick
+        return self.last_tick is None or (elapsed >= self.min_interval and
+                                         (signature != self.last_signature or elapsed >= self.max_interval))
+
+    def is_request_due(self, state, tick):
+        cooldown = self.last_attempt_tick is None or tick - self.last_attempt_tick >= self.min_interval
+        return cooldown and (self.request_pending or self.is_due(state, tick))
 
     def choose(self, state, memory, tick):
         senses = {'energy': round(state.energy, 3), 'age': round(state.age, 3),
                   'food': sum(c[2] for c in state.cells), 'hazards': sum(c[3] for c in state.cells),
                   'creatures': sum(c[4] for c in state.cells)}
         signature = (state.energy < .3, bool(senses['food']), bool(senses['hazards']), senses['creatures'] > 3)
-        elapsed = 0 if self.last_tick is None else tick - self.last_tick
-        due = self.last_tick is None or (elapsed >= self.min_interval and
-                                        (signature != self.last_signature or elapsed >= self.max_interval))
-        if not due:
+        granted = self.scheduler is not None and self.scheduler.selected == memory.owner
+        if not self.is_due(state, tick) and not granted:
             return self.goal
         self.last_tick, self.last_signature = tick, signature  # Failed calls also consume cooldown.
         context = {'senses': senses, 'current_goal': self.goal, 'memory': memory.context(state)}
-        source, error = 'rule', None
+        source, error, error_code = 'rule', None, None
         planner = self.planner
         if not isinstance(planner, RulePlanner):
-            if self.budget.take():
+            admitted = self.scheduler.take(memory.owner) if self.scheduler else self.budget.take()
+            if admitted:
                 source = 'llm'
+                self.request_pending = False
+                self.last_attempt_tick = tick
             else:
-                planner, source = RulePlanner(), 'budget_fallback'
+                self.request_pending = True
+                planner = RulePlanner()
+                source = self.scheduler.fallback_source() if self.scheduler else 'budget_fallback'
         attempted = source == 'llm'
+        proposal = None
         try:
             decision = planner.plan(context)
             # Do not trust even a custom provider to bypass the output schema.
             decision = GoalDecision.parse(vars(decision))
+            if attempted:
+                proposal = vars(decision)
         except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
             error = type(exc).__name__  # Avoid logging endpoints/credentials/large remote responses.
+            error_code = (exc.code if isinstance(exc, StrategyResponseError) else
+                          'timeout' if isinstance(exc, TimeoutError) else
+                          'http_error' if hasattr(exc, 'code') else 'provider_or_validation_error')
             decision, source = RulePlanner().plan(context), 'error_fallback'
         if decision.confidence < .4:
             decision, source = RulePlanner().plan(context), 'confidence_fallback'
+            error_code = 'low_confidence'
         self.goal = decision.goal
-        self.events.append({'tick': tick, 'goal': decision.goal, 'confidence': decision.confidence,
+        event = {'tick': tick, 'world_tick': self.world_tick, 'goal': decision.goal, 'confidence': decision.confidence,
                             'reason': decision.reason, 'source': source, 'error': error,
+                            'error_code': error_code, 'prompt_version': PROMPT_VERSION,
                             'request_attempted': attempted,
                             'latency_s': getattr(planner, 'last_latency_s', None) if attempted else None,
-                            'usage': getattr(planner, 'last_usage', {}) if attempted else {}})
+                            'usage': dict(getattr(planner, 'last_usage', {})) if attempted else {},
+                            'diagnostics': dict(getattr(planner, 'last_diagnostics', {})) if attempted else {}}
+        if attempted:
+            event['context'] = context
+            event['proposed_decision'] = proposal
+        self.events.append(event)
         self.events = self.events[-128:]
+        if self.event_sink:
+            self.event_sink(event)
         return self.goal
 
 
@@ -220,15 +303,19 @@ class MemoryStrategyAgent(RandomAgent):
         best = max(scores.values())
         return self.rng.choice([a for a, score in scores.items() if score == best])
 
-    def observe(self, state, action, reward, next_state, done):
+    def observe(self, state, action, reward, next_state, done, *, terminated=None, truncated=None):
         self.memory.remember(state, action, reward, next_state, done)
         self.tick += 1
         self.episode_reward += reward
         if done:
-            self.finish_episode()
+            self.finish_episode(end_reason='died' if terminated else 'time_limit' if truncated else 'ended_unspecified')
 
-    def finish_episode(self, interrupted=False):
+    def observe_transition(self, transition, *, terminated, truncated):
+        self.observe(transition.state, transition.action, transition.reward, transition.next_state, transition.done,
+                     terminated=terminated, truncated=truncated)
+
+    def finish_episode(self, interrupted=False, end_reason='ended_unspecified'):
         if not self.episode_finished:
             self.memory.finish_episode(reward=self.episode_reward, steps=self.tick,
-                                       outcome='interrupted' if interrupted else 'done')
+                                       outcome='interrupted' if interrupted else end_reason)
             self.episode_finished = True

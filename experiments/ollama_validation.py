@@ -95,7 +95,7 @@ def run_validation(*, model=None, endpoint='http://127.0.0.1:11434', timeout=60,
                       f"latency={event['latency_s']:.2f}s error={event['error']}", flush=True)
             result = env.step({0: action})
             t = result.transitions[0]
-            agent.observe(t.state, t.action, t.reward, t.next_state, t.done)
+            agent.observe_transition(t, terminated=result.terminated[0], truncated=result.truncated)
             observations = result.observations
             if result.done:
                 break

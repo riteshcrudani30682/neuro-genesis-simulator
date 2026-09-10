@@ -125,8 +125,9 @@ def test_ollama_payload_and_parse_without_real_network():
     planner = OllamaPlanner('installed-test-model', transport=transport)
     assert planner.plan({'senses': {}}).goal == 'seek_food'
     assert captured[0]['stream'] is False
-    assert captured[0]['options']['num_predict'] == 96
-    assert captured[0]['format'] == 'json'
+    assert captured[0]['options']['num_predict'] == 160
+    assert captured[0]['format']['properties']['goal']['enum'] == ['seek_food', 'avoid_competition', 'explore', 'protect_energy']
+    assert captured[0]['format']['additionalProperties'] is False
     assert len(captured[0]['messages']) == 2
 
 

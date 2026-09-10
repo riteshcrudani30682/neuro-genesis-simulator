@@ -264,3 +264,12 @@ Automated HTTP fixtures remain separate from actual model evidence.
 
 See [validation and benchmark instructions](docs/REPEATED_PPO_OLLAMA.md) and
 [measured results](docs/results/repeated-ppo/README.md).
+
+### Strategy reliability update
+
+LLM calls now use a paced per-episode allocation and fair selection among eligible
+creatures. Memory endings no longer imply success; movement scores are named.
+Structured output and bounded rejection diagnostics make failures auditable.
+After running, share `runs/strategy/latest_strategy.jsonl` and `summary.json` for
+just that run. Old aggregate logs and memories are preserved.
+See [details and the updated PC command](docs/STRATEGY_RELIABILITY.md).

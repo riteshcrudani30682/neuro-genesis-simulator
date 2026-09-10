@@ -37,7 +37,7 @@ def collect_episode(trainer, config, seed):
         next_features = {}
         for i in ids:
             t = result.transitions[i]
-            agents[i].observe(t.state, t.action, t.reward, t.next_state, t.done)
+            agents[i].observe_transition(t, terminated=result.terminated[i], truncated=result.truncated)
             next_features[i] = agents[i].features(t.next_state)
         next_values = trainer.values([next_features[i] for i in ids])
         for index, i in enumerate(ids):

@@ -27,8 +27,10 @@ python -m experiments.strategy_runner --episodes 2 --population 12 --steps 200 -
 
 The rule/heuristic headless mode needs only standard-library Python. Rendering
 adds Pygame; PPO adds PyTorch. Independent experiments should use different output
-folders or `--namespace` values. Output JSONL appends; new sessions are identified
-in `session.json`. Do not write to one output directory from multiple processes.
+folders or `--namespace` values. Aggregate JSONL appends; rows now identify the
+run UUID, session and episode. `latest_strategy.jsonl` contains just the current run;
+`sessions/<run_id>/` preserves each new run separately. See `session.json` and
+`summary.json`. Do not write to one output directory from multiple processes.
 
 ## Persistent memory: what is actually remembered
 
@@ -37,6 +39,10 @@ not a fictional spatial map. Keys use own energy bucket plus immediate local
 food/hazard/occupancy/boundary sensors. Each action retains visit count and mean
 observed reward. The low-level controller uses confidence-shrunk action values.
 There are up to 128 local patterns and 16 episode summaries per creature.
+New episode summaries distinguish `died`, `time_limit`, `interrupted` and
+`ended_unspecified`. Legacy `done` saves still load and are presented to the LLM as
+an unspecified ending, never success. The LLM sees named movement action values,
+not an unlabeled array it might mistake for high-level goal scores.
 No full-world coordinates, hidden resource information or other agents' memories
 are added. Memory is not inherited automatically at reproduction.
 
@@ -71,29 +77,37 @@ The model name is an example; supply one actually installed on your computer.
 This does not download models. Default endpoint is `http://127.0.0.1:11434` on the
 machine running Python, configurable with `--endpoint`.
 
-A strategy request occurs at the first decision, then only after a minimum 20
+A controller requests strategy at its first decision, then after a minimum 20
 ticks when low-energy/food/hazard/crowding conditions change, or after 80 ticks.
-All agents in the demo share a **10-request budget for the session**, including
-failed attempts. Requests are synchronous with a default 10-second HTTP timeout
+The shared scheduler considers all eligible creatures before actions. With defaults,
+the **10-request session budget is reserved as 5 per episode**, spaced at least
+40 world ticks apart. It prioritizes least-served eligible owners, then waiting
+time, then a seeded hash tie-break. Denied requests remain pending, so a local
+rule fallback cannot erase a creature's place waiting for LLM admission.
+Failures consume their slot; unused quota is not borrowed from future episodes.
+Requests are synchronous with a default 10-second HTTP timeout
 (`--llm-timeout` can raise it to 60 seconds);
 the first implementation may pause the viewer during a local inference. It is
-not an asynchronous real-time scheduler. With a small shared budget, early agents
-may consume requests before later agents; later agents use labeled rule fallback.
+not an asynchronous real-time scheduler. A limited budget cannot serve every
+creature; waiting, episode-budget and session-budget fallbacks are labeled separately.
 
 Static instructions and bounded dynamic summaries are sent as separate messages.
-There is no ever-growing chat history. Ollama uses `stream=false`, JSON format,
-`think=false`, temperature 0, a 96-token output limit, 2048-token context setting,
+There is no ever-growing chat history. Ollama uses `stream=false`, a strict JSON
+schema in `format`, `think=false`, temperature 0, a 160-token output limit, 2048-token context setting,
 and model keep-alive. Provider behavior/caching is not assumed. Responses must
 pass an exact goal/confidence/reason schema. Invalid, low-confidence, timed-out or
 budget-exhausted responses use labeled fallback and consume the cooldown rather
-than retrying each frame. `strategy.jsonl` records goal, source, reason, request
-attempts, error type and available token usage. No credentials are used/logged.
+than retrying each frame. `latest_strategy.jsonl` records source, actual context for
+each attempted request, accepted or low-confidence proposal, prompt version,
+error code, output-ending metadata, known token usage and a bounded rejected-output
+excerpt when parsing fails. These excerpts are diagnostic text, never executed.
 
 The adapter follows the [official Ollama chat API](https://docs.ollama.com/api/chat).
-Protocol and failure paths were tested with a hermetic simulated transport. No
-live Ollama model was available in this build environment, so live LLM quality
-and latency remain unverified. All committed experiment scores use **rules**, not
-LLM decisions.
+Protocol and failure paths are tested with hermetic transport and HTTP fixtures.
+A user-supplied Windows report previously validated the original live integration;
+the new schema/prompt and scheduler require a fresh PC run. All committed PPO
+experiment scores use **rules**, not LLM decisions. See
+[strategy reliability changes](STRATEGY_RELIABILITY.md).
 
 ## PPO: real on-policy learning
 
