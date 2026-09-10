@@ -234,3 +234,16 @@ python -m experiments.population_runner --generations 20 --population 50 --seed 
 See [Evolution V2 guide](docs/EVOLUTION_V2.md) for continuous mode, observation
 schema, baseline comparisons, passive rendering and JSON checkpoints.
 The standard-library population runner does not require Pygame or PyTorch.
+
+## Persistent Memory + Strategy + PPO
+
+Run the new multi-creature viewer:
+
+```bash
+python -m experiments.strategy_runner --render
+```
+
+It shows selected creature goals, persistent experience, generation, energy and
+planner source. Default rules work offline; Ollama is explicit opt-in. Real PPO
+training, frozen evaluation, a small demo checkpoint and memory ablation are
+available. See [Memory / Strategy / PPO guide](docs/MEMORY_STRATEGY_PPO.md).

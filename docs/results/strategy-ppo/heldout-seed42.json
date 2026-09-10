@@ -1,0 +1,104 @@
+[
+  {
+    "policy": "random",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      16.50008352073424,
+      22.89851442629826,
+      18.854402598498304
+    ],
+    "mean_fitness": 19.41766684851027,
+    "fitness_seed_std": 2.6423385443990526,
+    "mean_reward": 9.912291666666672,
+    "survival_rate": 0.5625
+  },
+  {
+    "policy": "heuristic",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      88.52901688038631,
+      90.97464418664853,
+      91.88113050265683
+    ],
+    "mean_fitness": 90.46159718989722,
+    "fitness_seed_std": 1.4157634806726613,
+    "mean_reward": 58.82270833333333,
+    "survival_rate": 1.0
+  },
+  {
+    "policy": "strategy_no_memory",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      91.33000944898546,
+      91.61206288744435,
+      95.92812999661541
+    ],
+    "mean_fitness": 92.95673411101508,
+    "fitness_seed_std": 2.1042470810654295,
+    "mean_reward": 60.7425,
+    "survival_rate": 1.0
+  },
+  {
+    "policy": "memory_strategy_heuristic",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      92.30600049066383,
+      90.14445156160114,
+      94.3195010082744
+    ],
+    "mean_fitness": 92.25665102017979,
+    "fitness_seed_std": 1.7048139679975753,
+    "mean_reward": 60.1904166666667,
+    "survival_rate": 1.0
+  },
+  {
+    "policy": "ppo_untrained",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      18.549646476770434,
+      26.118463478815688,
+      20.119382748163588
+    ],
+    "mean_fitness": 21.595830901249904,
+    "fitness_seed_std": 3.261561186934494,
+    "mean_reward": 11.854166666666679,
+    "survival_rate": 0.6875
+  },
+  {
+    "policy": "ppo_trained",
+    "seeds": [
+      101,
+      202,
+      303
+    ],
+    "seed_fitness": [
+      18.374626483908248,
+      23.60195977932269,
+      27.261865163695514
+    ],
+    "mean_fitness": 23.079483808975485,
+    "fitness_seed_std": 3.646961172681481,
+    "mean_reward": 12.651875000000013,
+    "survival_rate": 0.6875
+  }
+]
