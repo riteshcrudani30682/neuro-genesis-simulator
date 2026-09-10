@@ -43,7 +43,7 @@ def test_replay_buffer_keeps_recent_transitions():
     buffer.append(Transition(1, 1, 1.0, 2, False))
     buffer.append(Transition(2, 1, 1.0, 3, True))
     assert len(buffer) == 2
-    assert [item.state for item in buffer.sample(2)] == [1, 2] or [item.state for item in buffer.sample(2)] == [2, 1]
+    assert sorted(item.state for item in buffer.sample(2)) == [1, 2]
 
 
 def test_episode_runner_preserves_transition_alignment():
