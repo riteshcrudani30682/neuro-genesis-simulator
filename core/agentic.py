@@ -132,6 +132,11 @@ class AgenticCore:
     The executor is intentionally supplied per call. This keeps environment or
     broker side-effects outside the reasoning core and makes shadow/paper mode
     straightforward: pass a simulator executor instead of a real executor.
+
+    Memory backends may optionally expose ``context(observation)``. When present,
+    only that compact retrieval result is injected into the observation context,
+    preventing an unbounded transcript while allowing specialists to learn from
+    relevant prior outcomes.
     """
 
     def __init__(
@@ -150,14 +155,26 @@ class AgenticCore:
         self.memory = memory
         self.critic = critic or PassThroughCritic()
 
+    def _with_memory_context(self, observation: Observation) -> Observation:
+        context_provider = getattr(self.memory, "context", None)
+        if not callable(context_provider):
+            return observation
+        retrieved = context_provider(observation)
+        if not retrieved:
+            return observation
+        context = dict(observation.context)
+        context["retrieved_memories"] = retrieved
+        return Observation(state=observation.state, context=context)
+
     def run(self, observation: Observation, executor) -> Experience:
-        proposals = tuple(agent.propose(observation) for agent in self.specialists)
-        reviewed = tuple(self.critic.review(observation, proposals))
-        decision = self.decider.decide(observation, reviewed)
+        enriched = self._with_memory_context(observation)
+        proposals = tuple(agent.propose(enriched) for agent in self.specialists)
+        reviewed = tuple(self.critic.review(enriched, proposals))
+        decision = self.decider.decide(enriched, reviewed)
         outcome = executor(decision.action)
-        verification = self.verifier.verify(observation, decision, outcome)
+        verification = self.verifier.verify(enriched, decision, outcome)
         experience = Experience(
-            observation=observation,
+            observation=enriched,
             proposals=reviewed,
             decision=decision,
             outcome=outcome,
